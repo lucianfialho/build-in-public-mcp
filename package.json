@@ -1,0 +1,41 @@
+{
+  "name": "@lucianfialho/build-in-public-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Build in Public - automatically share your dev progress on Twitter",
+  "main": "./dist/index.js",
+  "bin": {
+    "build-in-public-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "claude-code",
+    "twitter",
+    "build-in-public",
+    "automation",
+    "developer-tools"
+  ],
+  "author": "Lucian Fialho",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "twitter-api-v2": "^1.28.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
+  }
+}
