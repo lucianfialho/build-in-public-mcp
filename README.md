@@ -1,6 +1,6 @@
 # Build in Public MCP Server
 
-> 🚧 **Alpha Version - Under Active Development**
+> ✅ **v0.2.0 - OAuth & Tweet Posting Working!**
 
 MCP (Model Context Protocol) server for Build in Public - automatically share your dev progress on Twitter directly from Claude Code.
 
@@ -82,21 +82,37 @@ Post a tweet immediately.
 **Input:**
 ```json
 {
-  "message": "Your tweet message here"
+  "message": "Your tweet message here (max 280 chars)"
 }
 ```
 
 **Returns:** Tweet URL
 
+### `mcp__bip__thread`
+Create a Twitter thread from multiple messages. Posts tweets in reply chain.
+
+**Input:**
+```json
+{
+  "messages": ["Tweet 1", "Tweet 2", "Tweet 3"]
+}
+```
+
+**Returns:** Array of tweet URLs
+
 ### `mcp__bip__setup_auth`
-Setup Twitter OAuth authentication.
+Setup Twitter OAuth authentication via PIN-based flow.
 
 **Input:** None (interactive flow)
 
-**Returns:** Auth status
+**Returns:** Auth status and username
 
-### `mcp__bip__thread` *(coming soon)*
-Create a Twitter thread from multiple messages.
+### `mcp__bip__status`
+Check authentication status and show storage location.
+
+**Input:** None
+
+**Returns:** Status info including authenticated user
 
 ## 🔐 Privacy & Security
 
@@ -108,9 +124,9 @@ Create a Twitter thread from multiple messages.
 ## 🗺️ Roadmap
 
 - [x] v0.1.0 - Basic MCP server + STDIO transport
-- [ ] v0.2.0 - Twitter OAuth + tweet posting
-- [ ] v0.3.0 - Thread creation
-- [ ] v1.0.0 - Production ready
+- [x] v0.2.0 - Twitter OAuth + tweet posting + thread creation ✅
+- [ ] v0.3.0 - MCP prompts + better error handling
+- [ ] v1.0.0 - Production ready + comprehensive docs
 - [ ] v1.1.0 - Skill for automatic context tracking
 - [ ] v2.0.0 - Optional Apify backend for analytics
 
