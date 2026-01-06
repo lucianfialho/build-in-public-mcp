@@ -15,6 +15,10 @@ claude mcp add --transport stdio build-in-public build-in-public-mcp
 
 ### Step 2: Setup Twitter Authentication
 
+You have **two options**:
+
+#### Option A: Interactive OAuth (Recommended)
+
 In Claude Code, ask:
 ```
 Setup Twitter authentication for build in public
@@ -26,13 +30,23 @@ Claude will call `mcp__bip__setup_auth` which will:
 3. Ask you to enter the PIN from Twitter
 4. Save tokens to `~/.build-in-public/auth.json`
 
-**Where to get API credentials:**
+#### Option B: Environment Variables
+
+Set these before starting Claude Code:
+```bash
+export TWITTER_API_KEY="your_api_key"
+export TWITTER_API_SECRET="your_api_secret"
+export TWITTER_ACCESS_TOKEN="your_access_token"
+export TWITTER_ACCESS_SECRET="your_access_secret"
+```
+
+**Where to get credentials:**
 1. Go to [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard)
 2. Create an app (if you don't have one)
 3. Go to "Keys and tokens"
-4. Copy your:
-   - API Key (Consumer Key)
-   - API Secret (Consumer Secret)
+4. Copy:
+   - API Key & Secret (Consumer Keys)
+   - Access Token & Secret (generate if needed)
 
 ### Step 3: Start Posting!
 

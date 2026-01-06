@@ -72,8 +72,20 @@ export async function postTweet(message: string): Promise<{
       id: tweetId,
       url: tweetUrl,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Failed to post tweet:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+
+    if (error.code === 403) {
+      throw new Error(
+        'Twitter API returned 403 Forbidden. This usually means:\n' +
+        '1. Your app does not have "Read and Write" permissions\n' +
+        '2. Your Access Tokens were generated BEFORE enabling write permissions\n' +
+        '3. You need to REGENERATE your Access Token & Secret after changing permissions\n\n' +
+        'Go to Twitter Developer Portal > Your App > Keys and tokens > Regenerate Access Token & Secret'
+      );
+    }
+
     throw error;
   }
 }
@@ -82,7 +94,10 @@ export async function postTweet(message: string): Promise<{
  * Create a Twitter thread
  * Posts multiple tweets in reply chain
  */
-export async function postThread(messages: string[]): Promise<{
+export async function postThread(
+  messages: string[],
+  replyToTweetId?: string
+): Promise<{
   ids: string[];
   urls: string[];
 }> {
@@ -98,6 +113,9 @@ export async function postThread(messages: string[]): Promise<{
   }
 
   console.error(`🧵 Creating thread with ${messages.length} tweets...`);
+  if (replyToTweetId) {
+    console.error(`📎 Replying to tweet: ${replyToTweetId}`);
+  }
 
   try {
     // Get user info for URLs
@@ -106,7 +124,8 @@ export async function postThread(messages: string[]): Promise<{
 
     const ids: string[] = [];
     const urls: string[] = [];
-    let previousTweetId: string | undefined;
+    // Start with replyToTweetId if provided
+    let previousTweetId: string | undefined = replyToTweetId;
 
     // Post each tweet in the thread
     for (let i = 0; i < messages.length; i++) {

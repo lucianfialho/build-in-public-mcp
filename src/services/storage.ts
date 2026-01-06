@@ -19,13 +19,6 @@ export interface AuthTokens {
   accessTokenSecret: string;
 }
 
-export interface SessionContext {
-  filesModified?: string[];
-  commandsRun?: string[];
-  toolsUsed?: string[];
-  lastUpdated?: string;
-}
-
 export interface TweetHistory {
   tweets: Array<{
     id: string;
@@ -41,6 +34,38 @@ export interface TweetHistory {
   }>;
 }
 
+export interface GitCommit {
+  hash: string;
+  message: string;
+  filesChanged: string[];
+  timestamp: string;
+  additions?: number;
+  deletions?: number;
+}
+
+export interface Command {
+  command: string;
+  description: string;
+  timestamp?: string;
+}
+
+export interface SessionContext {
+  sessionId: string;
+  startTime: string;
+  lastUpdated?: string;
+  filesModified: string[];
+  commandsRun: Command[];
+  toolsUsed: string[];
+  userMessages: string[];
+  commits: GitCommit[];
+  achievements: string[];
+  challenges: string[];
+  learnings: string[];
+  shouldTweet: boolean;
+  triggerMessage?: string;
+  customMessage?: string;
+}
+
 /**
  * Ensure storage directory exists
  */
@@ -52,14 +77,21 @@ export function ensureStorageDir(): void {
 }
 
 /**
- * Check if auth tokens exist
+ * Check if auth tokens exist (either in env vars or file)
  */
 export function hasAuthTokens(): boolean {
-  return fs.existsSync(AUTH_FILE);
+  // Check environment variables first
+  const hasEnvTokens =
+    !!process.env.TWITTER_API_KEY &&
+    !!process.env.TWITTER_API_SECRET &&
+    !!process.env.TWITTER_ACCESS_TOKEN &&
+    !!process.env.TWITTER_ACCESS_SECRET;
+
+  return hasEnvTokens || fs.existsSync(AUTH_FILE);
 }
 
 /**
- * Save auth tokens
+ * Save auth tokens to file
  */
 export function saveAuthTokens(tokens: AuthTokens): void {
   ensureStorageDir();
@@ -70,15 +102,41 @@ export function saveAuthTokens(tokens: AuthTokens): void {
 }
 
 /**
- * Load auth tokens
+ * Load auth tokens from environment variables or file
+ * Priority: environment variables > auth.json file
  */
 export function loadAuthTokens(): AuthTokens | null {
+  // Try environment variables first (following Supabase MCP pattern)
+  console.error('🔍 Debug: Checking env vars:', {
+    hasApiKey: !!process.env.TWITTER_API_KEY,
+    hasApiSecret: !!process.env.TWITTER_API_SECRET,
+    hasAccessToken: !!process.env.TWITTER_ACCESS_TOKEN,
+    hasAccessSecret: !!process.env.TWITTER_ACCESS_SECRET,
+  });
+
+  if (
+    process.env.TWITTER_API_KEY &&
+    process.env.TWITTER_API_SECRET &&
+    process.env.TWITTER_ACCESS_TOKEN &&
+    process.env.TWITTER_ACCESS_SECRET
+  ) {
+    console.error('🔐 Using Twitter credentials from environment variables');
+    return {
+      apiKey: process.env.TWITTER_API_KEY,
+      apiSecret: process.env.TWITTER_API_SECRET,
+      accessToken: process.env.TWITTER_ACCESS_TOKEN,
+      accessTokenSecret: process.env.TWITTER_ACCESS_SECRET,
+    };
+  }
+
+  // Fall back to auth.json file
   if (!fs.existsSync(AUTH_FILE)) {
     return null;
   }
 
   try {
     const data = fs.readFileSync(AUTH_FILE, 'utf-8');
+    console.error('🔐 Using Twitter credentials from:', AUTH_FILE);
     return JSON.parse(data) as AuthTokens;
   } catch (error) {
     console.error('❌ Failed to load auth tokens:', error);
@@ -192,4 +250,51 @@ export function addThreadToHistory(
  */
 export function getStorageDir(): string {
   return STORAGE_DIR;
+}
+
+/**
+ * Save session context
+ */
+export function saveSessionContext(context: SessionContext): void {
+  ensureStorageDir();
+  const data = {
+    ...context,
+    lastUpdated: new Date().toISOString(),
+  };
+  fs.writeFileSync(CONTEXT_FILE, JSON.stringify(data, null, 2));
+  console.error('💾 Session context saved');
+}
+
+/**
+ * Load session context
+ */
+export function loadSessionContext(): SessionContext | null {
+  if (!fs.existsSync(CONTEXT_FILE)) {
+    return null;
+  }
+
+  try {
+    const data = fs.readFileSync(CONTEXT_FILE, 'utf-8');
+    return JSON.parse(data) as SessionContext;
+  } catch (error) {
+    console.error('❌ Failed to load session context:', error);
+    return null;
+  }
+}
+
+/**
+ * Clear session context
+ */
+export function clearSessionContext(): void {
+  if (fs.existsSync(CONTEXT_FILE)) {
+    fs.unlinkSync(CONTEXT_FILE);
+    console.error('🗑️  Session context cleared');
+  }
+}
+
+/**
+ * Check if session context exists
+ */
+export function hasSessionContext(): boolean {
+  return fs.existsSync(CONTEXT_FILE);
 }

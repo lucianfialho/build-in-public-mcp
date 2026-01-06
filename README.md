@@ -1,14 +1,18 @@
 # Build in Public MCP Server
 
-> ✅ **v0.2.0 - OAuth & Tweet Posting Working!**
+> ✅ **v0.3.0 - AI-Powered Tweet Suggestions!**
 
 MCP (Model Context Protocol) server for Build in Public - automatically share your dev progress on Twitter directly from Claude Code.
 
 ## 🎯 What is this?
 
-This MCP server allows developers to share their coding progress on Twitter automatically while working with Claude Code. Perfect for the #BuildInPublic movement!
+**The idea is simple:** If Claude Code is already helping you build, why not use it to document the journey too?
+
+This MCP server analyzes your coding sessions and generates intelligent tweet suggestions about what you accomplished. Share your dev journey without breaking flow!
 
 **Features:**
+- 🤖 **AI-powered tweet suggestions** - Analyzes your coding session and suggests tweets
+- 🔄 **Retrospective mode** (`/bp retro`) - Review entire session and extract achievements
 - 🐦 Post tweets immediately with `/bp` command
 - 🧵 Create threads about your dev progress
 - 🔐 OAuth authentication (tokens stored locally)
@@ -30,9 +34,23 @@ npm install -g @lucianfialho/build-in-public-mcp
 claude mcp add --transport stdio build-in-public build-in-public-mcp
 ```
 
+## 📖 How It Works
+
+**The Philosophy:** If Claude Code is already helping you code, why not help you share your journey too?
+
+1. **You code** - Claude Code assists you with development
+2. **Context is captured** - Files changed, commands run, achievements unlocked
+3. **AI analyzes** - When you run `/bp retro`, AI extracts meaningful insights
+4. **Suggestions generated** - Get tweet ideas about what you actually accomplished
+5. **One-click post** - Choose a suggestion and post to Twitter instantly
+
 ## 🚀 Quick Start
 
 ### 1. Setup Twitter Authentication
+
+You have **two options** for authentication:
+
+#### Option A: Interactive OAuth (Recommended)
 
 First time only:
 ```
@@ -46,20 +64,71 @@ Claude: Let me help you setup Twitter authentication
 ✅ Done! Tokens saved to ~/.build-in-public/auth.json
 ```
 
+#### Option B: Environment Variables
+
+Set these environment variables before starting Claude Code:
+
+```bash
+export TWITTER_API_KEY="your_api_key"
+export TWITTER_API_SECRET="your_api_secret"
+export TWITTER_ACCESS_TOKEN="your_access_token"
+export TWITTER_ACCESS_SECRET="your_access_secret"
+```
+
+**Where to get these credentials:**
+1. Go to [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard)
+2. Create an app (or use existing)
+3. Go to "Keys and tokens"
+4. Copy API Key & Secret (Consumer Keys)
+5. Generate Access Token & Secret
+
+**Priority:** If both methods are configured, environment variables take precedence over `~/.build-in-public/auth.json`.
+
 ### 2. Start Posting!
 
-**Immediate tweet:**
-```bash
+#### Option 1: Quick Tweet
+Post immediately with a custom message:
+```
 /bp Just launched my new feature! 🚀
 ```
 
-**Thread (coming soon):**
+#### Option 2: AI-Powered Retro (Recommended!)
+Let AI analyze your entire coding session and suggest tweets:
 ```
-"Finished payment integration #thread"
-[Claude works on it...]
-[git push detected]
-→ Thread auto-posted to Twitter
+/bp retro
 ```
+
+Claude will:
+- Review everything you did this session
+- Extract achievements, learnings, and challenges
+- Generate multiple tweet suggestions with confidence scores
+- Let you choose or customize before posting
+
+**Example output:**
+```
+📊 Session Analysis Complete!
+
+Achievements:
+✅ Implemented OAuth authentication system
+✅ Fixed 3 critical bugs
+✅ Shipped v2.0 with new dashboard
+
+Based on your session, here are tweet suggestions:
+
+1. [85% confidence] "Just shipped v2.0! 🚀
+   New features: OAuth login, redesigned dashboard, 3 bugs squashed.
+   4 hours of flow state → production ready ✨ #BuildInPublic"
+
+2. [75% confidence] "💡 TIL: OAuth token refresh is trickier than I thought..."
+
+Which one would you like to post? (1-2, or provide custom message)
+```
+
+#### Option 3: AI Suggestions from Current Context
+```
+/bp
+```
+Gets suggestions based on what the hooks have captured so far.
 
 ## 🛠️ Architecture
 

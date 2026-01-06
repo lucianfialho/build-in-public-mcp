@@ -7,6 +7,8 @@ dist/
 
 # Environment variables (local auth tokens)
 .env
+.mcp.json
+auth.json
 
 # IDE
 .vscode/
