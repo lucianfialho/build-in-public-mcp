@@ -1,6 +1,6 @@
 # Build in Public MCP Server
 
-> ✅ **v0.3.0 - AI-Powered Tweet Suggestions!**
+> ✅ **v0.3.2 - MCP Prompts & AI-Powered Suggestions!**
 
 MCP (Model Context Protocol) server for Build in Public - automatically share your dev progress on Twitter directly from Claude Code.
 
@@ -86,16 +86,17 @@ export TWITTER_ACCESS_SECRET="your_access_secret"
 
 ### 2. Start Posting!
 
-#### Option 1: Quick Tweet
-Post immediately with a custom message:
+#### Option 1: AI-Powered Retro (Recommended!)
+Let Claude analyze your entire coding session and suggest tweets:
+
+Just ask Claude naturally:
 ```
-/bp Just launched my new feature! 🚀
+"Analyze my session and help me share what I accomplished on Twitter"
 ```
 
-#### Option 2: AI-Powered Retro (Recommended!)
-Let AI analyze your entire coding session and suggest tweets:
+Or in other projects, you can use:
 ```
-/bp retro
+"Hey Claude, let's do a build in public retro"
 ```
 
 Claude will:
@@ -104,8 +105,11 @@ Claude will:
 - Generate multiple tweet suggestions with confidence scores
 - Let you choose or customize before posting
 
-**Example output:**
+**Example flow:**
 ```
+You: "Analyze my session and suggest a tweet about what I built"
+
+Claude:
 📊 Session Analysis Complete!
 
 Achievements:
@@ -121,14 +125,23 @@ Based on your session, here are tweet suggestions:
 
 2. [75% confidence] "💡 TIL: OAuth token refresh is trickier than I thought..."
 
-Which one would you like to post? (1-2, or provide custom message)
+Which one would you like to post?
+
+You: "Post #1"
+
+Claude: ✅ Tweet posted! [shows URL]
+```
+
+#### Option 2: Quick Tweet
+Just ask Claude to post directly:
+```
+"Post to Twitter: Just launched my new feature! 🚀"
 ```
 
 #### Option 3: AI Suggestions from Current Context
 ```
-/bp
+"Give me tweet suggestions based on what I've been working on"
 ```
-Gets suggestions based on what the hooks have captured so far.
 
 ## 🛠️ Architecture
 
@@ -142,6 +155,21 @@ Claude Code → STDIO → MCP Server (local) → HTTPS → Twitter API
 ```
 
 **100% local, zero external infrastructure!**
+
+## 🎭 MCP Prompts (Advanced)
+
+The server exposes MCP prompts that Claude can use automatically:
+
+### `retro`
+Triggers full session analysis and tweet generation workflow.
+
+### `quick <message>`
+Posts a quick tweet with the provided message.
+
+### `suggest`
+Generates AI-powered tweet suggestions from current session context.
+
+**Note:** You don't need to use these directly - just talk to Claude naturally and it will use them when appropriate!
 
 ## 📚 Available Tools
 
@@ -194,7 +222,8 @@ Check authentication status and show storage location.
 
 - [x] v0.1.0 - Basic MCP server + STDIO transport
 - [x] v0.2.0 - Twitter OAuth + tweet posting + thread creation
-- [x] v0.3.0 - AI-powered suggestions + retro mode + context tracking ✅
+- [x] v0.3.0 - AI-powered suggestions + retro mode + context tracking
+- [x] v0.3.2 - MCP prompts integration (retro, quick, suggest) ✅
 - [ ] v1.0.0 - Production ready + comprehensive docs
 - [ ] v1.1.0 - Enhanced hooks for automatic context tracking
 - [ ] v2.0.0 - Optional analytics and insights

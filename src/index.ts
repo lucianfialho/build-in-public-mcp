@@ -10,6 +10,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { performOAuthFlow } from './utils/oauth.js';
@@ -32,14 +34,157 @@ import { generateSuggestions, scoreConfidence } from './services/suggestion-engi
 const server = new Server(
   {
     name: 'build-in-public',
-    version: '0.3.0',
+    version: '0.3.2',
   },
   {
     capabilities: {
       tools: {},
+      prompts: {},
     },
   }
 );
+
+/**
+ * List available prompts
+ */
+server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  return {
+    prompts: [
+      {
+        name: 'retro',
+        description: 'Analyze your entire coding session and generate tweet suggestions about what you accomplished',
+        arguments: [],
+      },
+      {
+        name: 'quick',
+        description: 'Post a quick tweet with a custom message',
+        arguments: [
+          {
+            name: 'message',
+            description: 'Your tweet message (will be posted immediately)',
+            required: true,
+          },
+        ],
+      },
+      {
+        name: 'suggest',
+        description: 'Get AI-powered tweet suggestions based on current session context',
+        arguments: [],
+      },
+    ],
+  };
+});
+
+/**
+ * Get prompt content
+ */
+server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  const { name, arguments: args } = request.params;
+
+  switch (name) {
+    case 'retro':
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: `# Build in Public - Retrospective Mode
+
+Analyze the ENTIRE coding session and help me share what I accomplished on Twitter.
+
+## Your Task
+
+1. **Review the full conversation** - Look at everything we've done from the start of this session
+2. **Extract key information:**
+   - What features/functionality were built?
+   - What bugs were fixed?
+   - What was learned (TIL moments)?
+   - What challenges were overcome?
+   - What technologies/tools were used?
+   - Any interesting technical decisions or breakthroughs?
+
+3. **Save the context** - Call mcp__bip__save_context with a comprehensive SessionContext object including:
+   - filesModified: array of file paths that were changed
+   - commandsRun: array of notable commands executed
+   - commits: git commits if any
+   - achievements: list of things accomplished
+   - challenges: problems that were solved
+   - learnings: new things discovered/learned
+   - toolsUsed: tools and technologies used
+
+4. **Generate suggestions** - Call mcp__bip__suggest to get AI-powered tweet suggestions
+
+5. **Present options** - Show me the suggestions with confidence scores and let me choose which one to post (or customize)
+
+6. **Post the tweet** - Once I choose, use mcp__bip__tweet to post it
+
+**Important:** This is about celebrating progress and sharing learnings authentically. Focus on what was actually accomplished, not hype.`,
+            },
+          },
+        ],
+      };
+
+    case 'quick':
+      const message = args?.message as string;
+      if (!message) {
+        return {
+          messages: [
+            {
+              role: 'user',
+              content: {
+                type: 'text',
+                text: 'Error: Please provide a message for your tweet.',
+              },
+            },
+          ],
+        };
+      }
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: `Post this message to Twitter immediately using mcp__bip__tweet:
+
+"${message}"
+
+After posting, show me the tweet URL.`,
+            },
+          },
+        ],
+      };
+
+    case 'suggest':
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: `# Build in Public - Get Tweet Suggestions
+
+Based on the current session context, generate intelligent tweet suggestions.
+
+## Your Task
+
+1. **Load context** - Call mcp__bip__get_context to see what's available
+2. **Generate suggestions** - Call mcp__bip__suggest to get AI-powered tweet ideas
+3. **Present options** - Show me the suggestions with confidence scores
+4. **Let me choose** - I'll pick one to post or provide a custom message
+5. **Post** - Use mcp__bip__tweet when I'm ready
+
+Focus on authentic sharing of progress, learnings, and challenges.`,
+            },
+          },
+        ],
+      };
+
+    default:
+      throw new Error(`Unknown prompt: ${name}`);
+  }
+});
 
 /**
  * List available tools
@@ -296,7 +441,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const authenticated = isAuthenticated();
 
         let statusText = `📊 Build in Public MCP Server Status\n\n`;
-        statusText += `Version: 0.3.0\n`;
+        statusText += `Version: 0.3.2\n`;
         statusText += `Storage: ${getStorageDir()}\n\n`;
 
         // Debug: Show env vars status
@@ -493,7 +638,7 @@ async function main() {
 
   // Log to stderr (stdout is used for MCP protocol)
   console.error('🚀 Build in Public MCP Server started');
-  console.error('📍 Version: 0.2.0');
+  console.error('📍 Version: 0.3.2');
   console.error('🔗 Transport: STDIO');
   console.error('💾 Storage:', getStorageDir());
   console.error('');
