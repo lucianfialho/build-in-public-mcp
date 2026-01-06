@@ -8,9 +8,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Skill for automatic context tracking
-- MCP prompts for tweet/thread templates
+- Enhanced hooks for automatic context tracking
 - Analytics integration (v2.0)
+- Template system for tweets
+
+## [0.3.2] - 2026-01-06
+
+### Changed
+- ⚡ **Removed `/bp` skill** - Incompatible with NPM distribution
+- ✨ **Implemented MCP Prompts** - Native Claude Code integration
+  - `retro` - Analyze session and generate tweets
+  - `quick <message>` - Post quick tweet
+  - `suggest` - Get AI-powered suggestions
+- 📝 **Natural language interaction** - Just talk to Claude naturally
+- 🔧 Updated all documentation to reflect prompt-based workflow
+
+### Technical
+- Added `ListPromptsRequestSchema` and `GetPromptRequestSchema` handlers
+- Prompts embedded directly in MCP server (no external files)
+- Removed `.claude/` directory from package distribution
+
+## [0.3.1] - 2026-01-06
+
+### Fixed
+- 📦 **Added `.claude/skills/` to NPM package** - Skills now distributed with package
+- 🐛 Fixed skill discovery issue in NPM installations
+
+### Technical
+- Updated `package.json` files array to include `.claude` directory
+
+## [0.3.0] - 2026-01-06
+
+### Added
+- 🤖 **AI-powered tweet suggestion engine** with 4 strategies:
+  - Commit-based: Suggests tweets from git commits
+  - Achievement-based: Celebrates accomplishments
+  - Learning-based: Shares TIL moments
+  - Session-based: Summarizes coding sessions
+- 🔄 **Retrospective mode** - Analyze entire session and extract insights
+- 💾 **Context tracking** - SessionContext with achievements, challenges, learnings
+- 🔧 **3 new MCP tools**:
+  - `mcp__bip__suggest` - Generate intelligent tweet suggestions
+  - `mcp__bip__save_context` - Save session context
+  - `mcp__bip__get_context` - Retrieve session context
+- 🧵 **Thread reply support** - `replyToTweetId` parameter for creating thread replies
+- 🎯 **Confidence scoring** - AI rates suggestion quality (0.0-1.0)
+
+### Technical Implementation
+- `src/services/suggestion-engine.ts` - AI suggestion generator
+- `src/services/git-analyzer.ts` - Git commit parser
+- Enhanced `SessionContext` interface with commits, achievements, challenges, learnings
+- Updated storage to `~/.build-in-public/` (unified location)
+- Python hooks for automatic context tracking
+
+### Features
+- Analyze full coding sessions
+- Extract meaningful achievements and learnings
+- Generate multiple tweet suggestions with confidence scores
+- Create threads that reply to existing tweets
+- Track session context automatically
 
 ## [0.2.0] - 2026-01-02
 

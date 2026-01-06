@@ -6,12 +6,14 @@
 
 ```bash
 # Using NPX (recommended - always latest version)
-claude mcp add --transport stdio build-in-public npx -y @lucianfialho/build-in-public-mcp
+claude mcp add --transport stdio build-in-public npx @lucianfialho/build-in-public-mcp
 
 # OR install globally
 npm install -g @lucianfialho/build-in-public-mcp
 claude mcp add --transport stdio build-in-public build-in-public-mcp
 ```
+
+After adding, **restart Claude Code** for changes to take effect.
 
 ### Step 2: Setup Twitter Authentication
 
@@ -50,39 +52,54 @@ export TWITTER_ACCESS_SECRET="your_access_secret"
 
 ### Step 3: Start Posting!
 
-```
-You: /bp Just shipped a new feature! 🚀
-
-Claude: [Posts to Twitter]
-✅ Tweet posted: https://twitter.com/you/status/123...
-```
+Just talk to Claude naturally! The MCP server provides prompts that Claude uses automatically.
 
 ## Usage Examples
 
-### Immediate Tweet
+### Quick Tweet
 ```
-/bp Launched my new product today! 🎉
+You: Post to Twitter: Just shipped a new feature! 🚀
+
+Claude: [Posts to Twitter via mcp__bip__tweet]
+✅ Tweet posted: https://twitter.com/you/status/123...
+```
+
+### AI-Powered Retro (Analyze Your Session)
+```
+You: Analyze my coding session and suggest a tweet about what I built
+
+Claude: [Reviews session, extracts achievements, generates suggestions]
+📊 Session Analysis Complete!
+
+Achievements:
+✅ Implemented OAuth authentication
+✅ Fixed 3 bugs
+✅ Deployed to production
+
+Tweet Suggestions:
+1. [85% confidence] "Just shipped OAuth! 🚀 ..."
+2. [75% confidence] "💡 TIL about token refresh..."
+
+Which would you like to post?
 ```
 
 ### Create a Thread
 ```
-Create a thread about the feature I just built
-```
+You: Create a thread about the OAuth feature I just built
 
-Claude will call `mcp__bip__thread` with messages like:
-```
-["🧵 Just built OAuth integration", "It took 3 days but works perfectly", "Next up: payment processing"]
+Claude: [Analyzes context, creates thread via mcp__bip__thread]
+✅ Thread posted! [URLs]
 ```
 
 ### Check Status
 ```
-What's the status of build in public?
-```
+You: What's the status of build in public?
 
-Claude will call `mcp__bip__status` and show:
-- Authentication status
-- Storage location
-- Available tools
+Claude: [Calls mcp__bip__status]
+📊 Build in Public MCP Server Status
+Version: 0.3.2
+✅ Authenticated as: @your_username
+```
 
 ## Troubleshooting
 
@@ -102,8 +119,10 @@ claude mcp list
 
 If not listed, add it again:
 ```bash
-claude mcp add --transport stdio build-in-public npx -y @lucianfialho/build-in-public-mcp
+claude mcp add --transport stdio build-in-public npx @lucianfialho/build-in-public-mcp
 ```
+
+Then restart Claude Code.
 
 ### OAuth flow doesn't open browser
 

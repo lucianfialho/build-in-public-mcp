@@ -2,7 +2,7 @@
   "$schema": "https://modelcontextprotocol.io/schemas/server.json",
   "name": "build-in-public",
   "description": "MCP server for Build in Public - automatically share your dev progress on Twitter",
-  "version": "0.2.0",
+  "version": "0.3.2",
   "transport": "stdio",
   "environmentVariables": [
     {

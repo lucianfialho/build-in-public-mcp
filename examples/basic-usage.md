@@ -5,13 +5,15 @@
 ### Quick Start (NPX)
 
 ```bash
-claude mcp add --transport stdio build-in-public npx -y @lucianfialho/build-in-public-mcp
+claude mcp add --transport stdio build-in-public npx @lucianfialho/build-in-public-mcp
 ```
+
+Then restart Claude Code.
 
 This command tells Claude Code to:
 - Add an MCP server named "build-in-public"
 - Use STDIO transport (stdin/stdout communication)
-- Run via NPX (always uses latest version)
+- Run via NPX (always uses latest version from NPM)
 
 ### Permanent Installation
 
@@ -27,15 +29,22 @@ claude mcp add --transport stdio build-in-public build-in-public-mcp
 
 ### Tweet Immediately
 
-```
-You: /bp Just shipped a new feature! 🚀
+Just ask Claude naturally:
 
-Claude: Let me post that tweet for you...
+```
+You: Post to Twitter: Just shipped a new feature! 🚀
+
+Claude: I'll post that tweet for you...
 > Calls: mcp__bip__tweet({ message: "Just shipped a new feature! 🚀" })
 > Returns: ✅ Tweet posted: https://twitter.com/you/status/123...
 
-Claude: Done! Your tweet is live at [link]
+Claude: ✅ Tweet posted! Your tweet is live at https://twitter.com/you/status/123...
 ```
+
+**Alternative ways to ask:**
+- "Share on Twitter: [your message]"
+- "Tweet this: [your message]"
+- "Post a tweet about [topic]"
 
 ### Setup Authentication (First Time)
 
@@ -78,13 +87,15 @@ Claude: ✅ Authentication complete! Tokens saved to ~/.build-in-public/auth.jso
 
 ### Data Flow
 
-1. **You type a command** in Claude Code (e.g., `/bp My message`)
-2. **Claude recognizes** it needs to use MCP tool
+1. **You send a message** in Claude Code (e.g., "Post to Twitter: My message")
+2. **Claude understands** your intent and decides to use MCP tool
 3. **Claude calls** `mcp__bip__tweet` via STDIO
 4. **MCP server** receives the call, processes it
 5. **MCP server** posts to Twitter API
 6. **MCP server** returns result to Claude
 7. **Claude shows** the result to you
+
+**Note:** Claude uses MCP prompts (`retro`, `quick`, `suggest`) automatically when appropriate. You don't need to memorize commands!
 
 ### Storage
 
@@ -108,7 +119,9 @@ All data is stored locally in `~/.build-in-public/`:
 claude mcp list
 
 # If not listed, add it again
-claude mcp add --transport stdio build-in-public npx -y @lucianfialho/build-in-public-mcp
+claude mcp add --transport stdio build-in-public npx @lucianfialho/build-in-public-mcp
+
+# Then restart Claude Code
 ```
 
 ### Auth not working
@@ -117,31 +130,18 @@ claude mcp add --transport stdio build-in-public npx -y @lucianfialho/build-in-p
 # Remove old auth file
 rm ~/.build-in-public/auth.json
 
-# Setup again
-# In Claude Code:
-# "Setup Twitter auth"
+# In Claude Code, ask:
+# "Setup Twitter auth for build in public"
 ```
 
 ### Tools not appearing
 
-Check Claude Code MCP configuration:
+Verify the MCP server is listed and connected:
 ```bash
-cat ~/.config/claude/mcp.json
-# or on macOS:
-cat ~/Library/Application\ Support/Claude/mcp.json
-```
+claude mcp list
 
-Should contain:
-```json
-{
-  "mcpServers": {
-    "build-in-public": {
-      "command": "npx",
-      "args": ["-y", "@lucianfialho/build-in-public-mcp"],
-      "transport": "stdio"
-    }
-  }
-}
+# Should show:
+# build-in-public: npx @lucianfialho/build-in-public-mcp - ✓ Connected
 ```
 
 ## Advanced Usage
