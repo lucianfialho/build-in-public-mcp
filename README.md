@@ -24,7 +24,7 @@ This MCP server analyzes your coding sessions and generates intelligent tweet su
 ### Method 1: NPX (Recommended)
 
 ```bash
-claude mcp add --transport stdio build-in-public npx -y @lucianfialho/build-in-public-mcp
+claude mcp add --transport stdio build-in-public npx @lucianfialho/build-in-public-mcp
 ```
 
 ### Method 2: Global Install
@@ -193,11 +193,11 @@ Check authentication status and show storage location.
 ## 🗺️ Roadmap
 
 - [x] v0.1.0 - Basic MCP server + STDIO transport
-- [x] v0.2.0 - Twitter OAuth + tweet posting + thread creation ✅
-- [ ] v0.3.0 - MCP prompts + better error handling
+- [x] v0.2.0 - Twitter OAuth + tweet posting + thread creation
+- [x] v0.3.0 - AI-powered suggestions + retro mode + context tracking ✅
 - [ ] v1.0.0 - Production ready + comprehensive docs
-- [ ] v1.1.0 - Skill for automatic context tracking
-- [ ] v2.0.0 - Optional Apify backend for analytics
+- [ ] v1.1.0 - Enhanced hooks for automatic context tracking
+- [ ] v2.0.0 - Optional analytics and insights
 
 ## 🤝 Contributing
 
