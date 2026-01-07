@@ -34,7 +34,7 @@ import { generateSuggestions, scoreConfidence } from './services/suggestion-engi
 const server = new Server(
   {
     name: 'build-in-public',
-    version: '0.3.2',
+    version: '0.3.3',
   },
   {
     capabilities: {
@@ -441,7 +441,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const authenticated = isAuthenticated();
 
         let statusText = `📊 Build in Public MCP Server Status\n\n`;
-        statusText += `Version: 0.3.2\n`;
+        statusText += `Version: 0.3.3\n`;
         statusText += `Storage: ${getStorageDir()}\n\n`;
 
         // Debug: Show env vars status
@@ -638,7 +638,7 @@ async function main() {
 
   // Log to stderr (stdout is used for MCP protocol)
   console.error('🚀 Build in Public MCP Server started');
-  console.error('📍 Version: 0.3.2');
+  console.error('📍 Version: 0.3.3');
   console.error('🔗 Transport: STDIO');
   console.error('💾 Storage:', getStorageDir());
   console.error('');
