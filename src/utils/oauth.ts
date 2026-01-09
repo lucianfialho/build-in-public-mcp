@@ -12,6 +12,16 @@ import { saveAuthTokens, AuthTokens } from '../services/storage.js';
 const execAsync = promisify(exec);
 
 /**
+ * Default Twitter App Credentials
+ * These are public and safe to commit - they identify the app, not the user
+ * Users can override with their own app by setting env vars:
+ * - TWITTER_API_KEY
+ * - TWITTER_API_SECRET
+ */
+const DEFAULT_API_KEY = 'zLW4QQ7597dy2YR4ruZJCtdme';
+const DEFAULT_API_SECRET = 'd0kKxuevPIcGRMmvrJ4RUKD6NBCRss769CGZiQ1pDKvRlm0nQM';
+
+/**
  * Open URL in browser
  */
 async function openBrowser(url: string): Promise<void> {
@@ -56,24 +66,15 @@ function getUserInput(prompt: string): Promise<string> {
 export async function performOAuthFlow(): Promise<AuthTokens> {
   console.error('🔐 Starting Twitter OAuth flow...\n');
 
-  // Step 1: Get API credentials from user
-  console.error('📋 You need API credentials from Twitter Developer Portal');
-  console.error('   https://developer.twitter.com/en/portal/dashboard\n');
+  // Step 1: Use default credentials or get from env vars
+  const apiKey = process.env.TWITTER_APP_KEY || DEFAULT_API_KEY;
+  const apiSecret = process.env.TWITTER_APP_SECRET || DEFAULT_API_SECRET;
 
-  const apiKey = await getUserInput('Enter your API Key (Consumer Key): ');
-  if (!apiKey) {
-    throw new Error('API Key is required');
-  }
-
-  const apiSecret = await getUserInput(
-    'Enter your API Secret (Consumer Secret): '
-  );
-  if (!apiSecret) {
-    throw new Error('API Secret is required');
-  }
+  console.error('✨ Using Build in Public MCP official app');
+  console.error('   (You can use your own app by setting TWITTER_APP_KEY and TWITTER_APP_SECRET env vars)\n');
 
   // Step 2: Initialize OAuth client
-  console.error('\n🔄 Initializing OAuth...');
+  console.error('🔄 Initializing OAuth...');
   const client = new TwitterApi({
     appKey: apiKey,
     appSecret: apiSecret,

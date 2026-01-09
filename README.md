@@ -1,6 +1,6 @@
 # Build in Public MCP Server
 
-> ✅ **v0.3.3 - Multi-IDE Support!**
+> ✅ **v0.4.0 - Simplified Authentication!**
 
 MCP (Model Context Protocol) server for Build in Public - automatically share your dev progress on Twitter directly from Claude Code, Cursor, VS Code, JetBrains IDEs, and more!
 
@@ -137,43 +137,53 @@ Follow similar configuration patterns as VS Code or Cursor. Refer to your IDE's 
 
 ## 🚀 Quick Start
 
-### 1. Setup Twitter Authentication
+### 1. Setup Twitter Authentication (Super Simple!)
 
-You have **two options** for authentication:
+**Just ask Claude to setup authentication:**
 
-#### Option A: Interactive OAuth (Recommended)
-
-First time only:
 ```
-You: How do I setup build in public?
-Claude: Let me help you setup Twitter authentication
-> Calls: mcp__bip__setup_auth
-> Opens browser for OAuth
-> You authorize the app
-> Copy PIN from Twitter
-> Paste in terminal
-✅ Done! Tokens saved to ~/.build-in-public/auth.json
+You: Setup build in public authentication
+Claude:
+  🔐 Starting Twitter OAuth flow...
+  ✨ Using Build in Public MCP official app
+  🔄 Initializing OAuth...
+  🌐 Opening browser...
+
+  📝 After authorizing, copy the PIN from Twitter
+
+You: [paste the PIN]
+Claude:
+  ✅ Successfully authenticated as: @your_username
+  💾 Tokens saved to: ~/.build-in-public/auth.json
 ```
 
-#### Option B: Environment Variables
+**That's it!** No need to:
+- ❌ Create a Twitter Developer account
+- ❌ Create an app
+- ❌ Copy API keys
+- ❌ Configure permissions
 
-Set these environment variables before starting Claude Code:
+Just authorize and you're done! 🎉
 
+---
+
+#### Advanced: Use Your Own Twitter App (Optional)
+
+If you want to use your own Twitter app instead of the default:
+
+**Option 1: Environment Variables (For Access Tokens)**
 ```bash
-export TWITTER_API_KEY="your_api_key"
-export TWITTER_API_SECRET="your_api_secret"
 export TWITTER_ACCESS_TOKEN="your_access_token"
 export TWITTER_ACCESS_SECRET="your_access_secret"
 ```
 
-**Where to get these credentials:**
-1. Go to [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard)
-2. Create an app (or use existing)
-3. Go to "Keys and tokens"
-4. Copy API Key & Secret (Consumer Keys)
-5. Generate Access Token & Secret
+**Option 2: Custom App Credentials (For OAuth)**
+```bash
+export TWITTER_APP_KEY="your_app_key"
+export TWITTER_APP_SECRET="your_app_secret"
+```
 
-**Priority:** If both methods are configured, environment variables take precedence over `~/.build-in-public/auth.json`.
+Then run the OAuth flow normally.
 
 ### 2. Start Posting!
 
@@ -316,9 +326,10 @@ Check authentication status and show storage location.
 - [x] v0.1.0 - Basic MCP server + STDIO transport
 - [x] v0.2.0 - Twitter OAuth + tweet posting + thread creation
 - [x] v0.3.0 - AI-powered suggestions + retro mode + context tracking
-- [x] v0.3.2 - MCP prompts integration (retro, quick, suggest) ✅
-- [x] v0.3.3 - Multi-IDE compatibility documentation ✅
-- [ ] v0.4.0 - Official testing on Cursor, VS Code, JetBrains
+- [x] v0.3.2 - MCP prompts integration (retro, quick, suggest)
+- [x] v0.3.3 - Multi-IDE compatibility documentation
+- [x] v0.4.0 - Simplified OAuth (no Twitter Developer account needed!) ✅
+- [ ] v0.5.0 - Official testing on Cursor, VS Code, JetBrains
 - [ ] v1.0.0 - Production ready + comprehensive docs
 - [ ] v1.1.0 - Enhanced hooks for automatic context tracking
 - [ ] v2.0.0 - Optional analytics and insights

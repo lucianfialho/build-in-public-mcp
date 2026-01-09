@@ -105,13 +105,16 @@ Claude Code ←→ STDIO ←→ MCP Server (local process) ←→ Twitter API
 
 #### OAuth Utilities (`src/utils/oauth.ts`)
 - **Purpose**: PIN-based OAuth 1.0a flow for Twitter authentication
+- **Default Credentials**: Uses hardcoded app credentials (public and safe)
 - **Flow**:
-  1. Prompts user for API credentials (Consumer Key/Secret)
+  1. Uses default Build in Public MCP app credentials (or env vars if set)
   2. Generates authorization URL
   3. Opens browser for user authorization
-  4. Exchanges PIN for access tokens
-  5. Saves tokens securely to `~/.build-in-public/auth.json`
+  4. User copies PIN from Twitter
+  5. Exchanges PIN for access tokens
+  6. Saves tokens securely to `~/.build-in-public/auth.json`
 - **Interactive**: Uses readline for terminal input (via stderr)
+- **Override**: Users can provide their own app via `TWITTER_APP_KEY` and `TWITTER_APP_SECRET` env vars
 
 ### MCP Tools
 
@@ -147,14 +150,23 @@ The server exposes 3 MCP prompts that Claude Code can use:
 ### Authentication Priority
 
 The system checks for Twitter credentials in this order:
+
+**For Access Tokens (posting tweets):**
 1. **Environment variables** (highest priority):
-   - `TWITTER_API_KEY`
-   - `TWITTER_API_SECRET`
    - `TWITTER_ACCESS_TOKEN`
    - `TWITTER_ACCESS_SECRET`
-2. **File-based tokens**: `~/.build-in-public/auth.json`
+2. **File-based tokens**: `~/.build-in-public/auth.json` (generated via OAuth)
 
-This allows flexible deployment - env vars for CI/CD, file-based for local development.
+**For App Credentials (OAuth flow):**
+1. **Environment variables** (for custom apps):
+   - `TWITTER_APP_KEY`
+   - `TWITTER_APP_SECRET`
+2. **Hardcoded defaults**: Built-in Build in Public MCP app credentials
+
+This allows flexible deployment:
+- **Users**: Just authorize via OAuth (no setup needed!)
+- **Developers**: Can use their own app via env vars
+- **CI/CD**: Can use env vars for access tokens
 
 ## TypeScript Configuration
 
