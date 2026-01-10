@@ -14,7 +14,7 @@ import {
   GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import { performOAuthFlow } from './utils/oauth.js';
+import { startOAuthFlow, completeOAuthFlow } from './utils/oauth.js';
 import {
   postTweet,
   postThread,
@@ -34,7 +34,7 @@ import { generateSuggestions, scoreConfidence } from './services/suggestion-engi
 const server = new Server(
   {
     name: 'build-in-public',
-    version: '0.4.0',
+    version: '0.4.1',
   },
   {
     capabilities: {
@@ -230,10 +230,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'mcp__bip__setup_auth',
         description:
-          'Setup Twitter authentication via OAuth 1.0a (PIN-based flow)',
+          'Setup Twitter authentication via OAuth 1.0a (PIN-based flow). Call without PIN to get authorization URL, then call again with PIN to complete.',
         inputSchema: {
           type: 'object',
-          properties: {},
+          properties: {
+            pin: {
+              type: 'string',
+              description: 'PIN code from Twitter (leave empty to start OAuth flow)',
+            },
+          },
         },
       },
       {
@@ -390,32 +395,51 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case 'mcp__bip__setup_auth': {
-        console.error('\n🔐 Starting OAuth setup...\n');
-        console.error('⚠️  IMPORTANT: This is an interactive flow.');
-        console.error(
-          '   Make sure you are running this in a terminal (not via Claude Code UI).\n'
-        );
+        const { pin } = args as { pin?: string };
 
         try {
-          const tokens = await performOAuthFlow();
+          if (!pin) {
+            // Step 1: Start OAuth flow and return authorization URL
+            console.error('\n🔐 Starting OAuth setup...\n');
 
-          // Verify credentials
-          const user = await verifyCredentials();
+            const { url } = await startOAuthFlow();
 
-          return {
-            content: [
-              {
-                type: 'text',
-                text:
-                  `✅ Authentication successful!\n\n` +
-                  `👤 Authenticated as: @${user.username} (${user.name})\n` +
-                  `💾 Tokens saved to: ${getStorageDir()}/auth.json\n\n` +
-                  `You can now use:\n` +
-                  `  - mcp__bip__tweet to post tweets\n` +
-                  `  - mcp__bip__thread to create threads`,
-              },
-            ],
-          };
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text:
+                    `🔐 Twitter Authorization\n\n` +
+                    `✅ Authorization URL opened in your browser!\n\n` +
+                    `📋 If the browser didn't open, go to:\n${url}\n\n` +
+                    `After authorizing, Twitter will show you a PIN code.\n\n` +
+                    `📝 **Next step:** Call this tool again with the PIN:\n` +
+                    `   mcp__bip__setup_auth with pin: "YOUR_PIN_HERE"`,
+                },
+              ],
+            };
+          } else {
+            // Step 2: Complete OAuth flow with PIN
+            const tokens = await completeOAuthFlow(pin);
+
+            // Verify credentials
+            const user = await verifyCredentials();
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text:
+                    `✅ Authentication successful!\n\n` +
+                    `👤 Authenticated as: @${user.username} (${user.name})\n` +
+                    `💾 Tokens saved to: ${getStorageDir()}/auth.json\n\n` +
+                    `You can now use:\n` +
+                    `  - mcp__bip__tweet to post tweets\n` +
+                    `  - mcp__bip__thread to create threads`,
+                },
+              ],
+            };
+          }
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : String(error);
@@ -427,7 +451,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   `❌ OAuth setup failed\n\n` +
                   `Error: ${errorMessage}\n\n` +
                   `Make sure you:\n` +
-                  `  1. Have valid Twitter API credentials\n` +
+                  `  1. Started the OAuth flow first (call without PIN)\n` +
                   `  2. Authorized the app on Twitter\n` +
                   `  3. Entered the correct PIN code`,
               },
@@ -441,7 +465,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const authenticated = isAuthenticated();
 
         let statusText = `📊 Build in Public MCP Server Status\n\n`;
-        statusText += `Version: 0.4.0\n`;
+        statusText += `Version: 0.4.1\n`;
         statusText += `Storage: ${getStorageDir()}\n\n`;
 
         // Debug: Show env vars status
@@ -638,7 +662,7 @@ async function main() {
 
   // Log to stderr (stdout is used for MCP protocol)
   console.error('🚀 Build in Public MCP Server started');
-  console.error('📍 Version: 0.4.0');
+  console.error('📍 Version: 0.4.1');
   console.error('🔗 Transport: STDIO');
   console.error('💾 Storage:', getStorageDir());
   console.error('');

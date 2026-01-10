@@ -60,10 +60,13 @@ function getUserInput(prompt: string): Promise<string> {
   });
 }
 
+// Store auth link temporarily (in-memory, per-process)
+let pendingAuthLink: { url: string; oauth_token: string; oauth_token_secret: string } | null = null;
+
 /**
- * Perform OAuth flow and save tokens
+ * Start OAuth flow - returns authorization URL
  */
-export async function performOAuthFlow(): Promise<AuthTokens> {
+export async function startOAuthFlow(): Promise<{ url: string }> {
   console.error('🔐 Starting Twitter OAuth flow...\n');
 
   // Step 1: Use default credentials or get from env vars
@@ -91,26 +94,45 @@ export async function performOAuthFlow(): Promise<AuthTokens> {
   // Step 4: Open browser
   await openBrowser(authLink.url);
 
-  console.error('\n📝 After authorizing, Twitter will show you a PIN code');
+  // Store auth link for later completion
+  pendingAuthLink = authLink;
 
-  // Step 5: Get PIN from user
-  const pin = await getUserInput('\nEnter the PIN code from Twitter: ');
+  return { url: authLink.url };
+}
+
+/**
+ * Complete OAuth flow with PIN
+ */
+export async function completeOAuthFlow(pin: string): Promise<AuthTokens> {
+  if (!pendingAuthLink) {
+    throw new Error('No pending OAuth flow. Please call startOAuthFlow first.');
+  }
+
   if (!pin) {
     throw new Error('PIN is required');
   }
 
-  // Step 6: Exchange PIN for access tokens
   console.error('\n🔄 Exchanging PIN for access tokens...');
+
+  const apiKey = process.env.TWITTER_APP_KEY || DEFAULT_API_KEY;
+  const apiSecret = process.env.TWITTER_APP_SECRET || DEFAULT_API_SECRET;
+
+  const client = new TwitterApi({
+    appKey: apiKey,
+    appSecret: apiSecret,
+    accessToken: pendingAuthLink.oauth_token,
+    accessSecret: pendingAuthLink.oauth_token_secret,
+  });
 
   const { client: loggedClient, accessToken, accessSecret } = await client.login(pin);
 
-  // Step 7: Verify credentials by getting user info
+  // Verify credentials by getting user info
   console.error('✅ Verifying credentials...');
   const currentUser = await loggedClient.v2.me();
 
   console.error(`\n🎉 Successfully authenticated as: @${currentUser.data.username}`);
 
-  // Step 8: Save tokens
+  // Save tokens
   const tokens: AuthTokens = {
     apiKey,
     apiSecret,
@@ -119,6 +141,9 @@ export async function performOAuthFlow(): Promise<AuthTokens> {
   };
 
   saveAuthTokens(tokens);
+
+  // Clear pending auth link
+  pendingAuthLink = null;
 
   return tokens;
 }
