@@ -105,15 +105,11 @@ Claude Code ←→ STDIO ←→ MCP Server (local process) ←→ Twitter API
 
 #### OAuth Utilities (`src/utils/oauth.ts`)
 - **Purpose**: PIN-based OAuth 1.0a flow for Twitter authentication
-- **Default Credentials**: Uses hardcoded app credentials (public and safe)
-- **Flow**:
-  1. Uses default Build in Public MCP app credentials (or env vars if set)
-  2. Generates authorization URL
-  3. Opens browser for user authorization
-  4. User copies PIN from Twitter
-  5. Exchanges PIN for access tokens
-  6. Saves tokens securely to `~/.build-in-public/auth.json`
-- **Interactive**: Uses readline for terminal input (via stderr)
+- **Default Credentials**: Uses hardcoded app credentials (public and safe to commit)
+- **Two-Step Flow** (STDIO-compatible):
+  1. `startOAuthFlow()`: Generates authorization URL, opens browser, stores pending auth in memory
+  2. `completeOAuthFlow(pin)`: Exchanges PIN for access tokens, saves to `~/.build-in-public/auth.json`
+- **No Blocking**: PIN passed as parameter instead of readline prompt (fixes STDIO conflict)
 - **Override**: Users can provide their own app via `TWITTER_APP_KEY` and `TWITTER_APP_SECRET` env vars
 
 ### MCP Tools
@@ -207,4 +203,4 @@ This context powers the suggestion engine's confidence scoring and tweet generat
 - Other files: Default permissions
 
 ## Version
-Current version: 0.3.2 (defined in package.json and src/index.ts)
+Current version: 0.4.1 (defined in package.json and src/index.ts)

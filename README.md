@@ -1,6 +1,6 @@
 # Build in Public MCP Server
 
-> ✅ **v0.4.0 - Simplified Authentication!**
+> ✅ **v0.4.1 - OAuth Fix for STDIO!**
 
 MCP (Model Context Protocol) server for Build in Public - automatically share your dev progress on Twitter directly from Claude Code, Cursor, VS Code, JetBrains IDEs, and more!
 
@@ -137,24 +137,40 @@ Follow similar configuration patterns as VS Code or Cursor. Refer to your IDE's 
 
 ## 🚀 Quick Start
 
-### 1. Setup Twitter Authentication (Super Simple!)
+### 1. Setup Twitter Authentication (2-Step Process)
 
-**Just ask Claude to setup authentication:**
+**Step 1: Start OAuth Flow**
 
 ```
 You: Setup build in public authentication
 Claude:
-  🔐 Starting Twitter OAuth flow...
-  ✨ Using Build in Public MCP official app
-  🔄 Initializing OAuth...
-  🌐 Opening browser...
+  🔐 Twitter Authorization
 
-  📝 After authorizing, copy the PIN from Twitter
+  ✅ Authorization URL opened in your browser!
 
-You: [paste the PIN]
+  📋 If the browser didn't open, go to:
+  https://api.twitter.com/oauth/authorize?oauth_token=...
+
+  After authorizing, Twitter will show you a PIN code.
+
+  📝 Next step: Call this tool again with the PIN:
+     mcp__bip__setup_auth with pin: "YOUR_PIN_HERE"
+```
+
+**Step 2: Complete with PIN**
+
+```
+You: Call setup_auth with pin: "1234567"
 Claude:
-  ✅ Successfully authenticated as: @your_username
+  🔄 Exchanging PIN for access tokens...
+  ✅ Verifying credentials...
+
+  🎉 Successfully authenticated as: @your_username
   💾 Tokens saved to: ~/.build-in-public/auth.json
+
+  You can now use:
+    - mcp__bip__tweet to post tweets
+    - mcp__bip__thread to create threads
 ```
 
 **That's it!** No need to:
@@ -163,7 +179,7 @@ Claude:
 - ❌ Copy API keys
 - ❌ Configure permissions
 
-Just authorize and you're done! 🎉
+Just authorize and paste the PIN! 🎉
 
 ---
 
@@ -328,7 +344,8 @@ Check authentication status and show storage location.
 - [x] v0.3.0 - AI-powered suggestions + retro mode + context tracking
 - [x] v0.3.2 - MCP prompts integration (retro, quick, suggest)
 - [x] v0.3.3 - Multi-IDE compatibility documentation
-- [x] v0.4.0 - Simplified OAuth (no Twitter Developer account needed!) ✅
+- [x] v0.4.0 - Simplified OAuth (no Twitter Developer account needed!)
+- [x] v0.4.1 - Fixed OAuth STDIO conflict (2-step PIN flow) ✅
 - [ ] v0.5.0 - Official testing on Cursor, VS Code, JetBrains
 - [ ] v1.0.0 - Production ready + comprehensive docs
 - [ ] v1.1.0 - Enhanced hooks for automatic context tracking
