@@ -730,6 +730,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           };
         }
 
+        // Get current preferences before update
+        const beforePrefs = preferencesService.getPreferences();
+
         // Build update object
         const updates: any = {};
         if (language) {
@@ -740,14 +743,46 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
 
         // Update preferences
-        const updatedPrefs = preferencesService.updatePreferences(updates);
+        const afterPrefs = preferencesService.updatePreferences(updates);
 
+        // Build before/after display
         let responseText = `✅ Preferences updated successfully!\n\n`;
-        responseText += `Language: ${updatedPrefs.language}\n\n`;
-        responseText += `Features:\n`;
-        responseText += `  • Commit tweets: ${updatedPrefs.features.enableCommitTweets ? '✅' : '❌'}\n`;
-        responseText += `  • Achievement tweets: ${updatedPrefs.features.enableAchievementTweets ? '✅' : '❌'}\n`;
-        responseText += `  • Learning tweets: ${updatedPrefs.features.enableLearningTweets ? '✅' : '❌'}\n`;
+
+        // Show language change if updated
+        if (language && beforePrefs.language !== afterPrefs.language) {
+          responseText += `Language: ${beforePrefs.language} → ${afterPrefs.language}\n`;
+        } else {
+          responseText += `Language: ${afterPrefs.language}\n`;
+        }
+
+        responseText += `\nFeatures:\n`;
+
+        // Show commit tweets change if updated
+        const commitBefore = beforePrefs.features.enableCommitTweets;
+        const commitAfter = afterPrefs.features.enableCommitTweets;
+        if (features?.enableCommitTweets !== undefined && commitBefore !== commitAfter) {
+          responseText += `  • Commit tweets: ${commitBefore ? '✅' : '❌'} → ${commitAfter ? '✅' : '❌'}\n`;
+        } else {
+          responseText += `  • Commit tweets: ${commitAfter ? '✅' : '❌'}\n`;
+        }
+
+        // Show achievement tweets change if updated
+        const achievementBefore = beforePrefs.features.enableAchievementTweets;
+        const achievementAfter = afterPrefs.features.enableAchievementTweets;
+        if (features?.enableAchievementTweets !== undefined && achievementBefore !== achievementAfter) {
+          responseText += `  • Achievement tweets: ${achievementBefore ? '✅' : '❌'} → ${achievementAfter ? '✅' : '❌'}\n`;
+        } else {
+          responseText += `  • Achievement tweets: ${achievementAfter ? '✅' : '❌'}\n`;
+        }
+
+        // Show learning tweets change if updated
+        const learningBefore = beforePrefs.features.enableLearningTweets;
+        const learningAfter = afterPrefs.features.enableLearningTweets;
+        if (features?.enableLearningTweets !== undefined && learningBefore !== learningAfter) {
+          responseText += `  • Learning tweets: ${learningBefore ? '✅' : '❌'} → ${learningAfter ? '✅' : '❌'}\n`;
+        } else {
+          responseText += `  • Learning tweets: ${learningAfter ? '✅' : '❌'}\n`;
+        }
 
         return {
           content: [
