@@ -39,3 +39,36 @@
 **Result:** All tests passed
 **Commit:** feat: Implement preferences service with defaults [task-F1-T2]
 
+---
+
+## [2026-01-15 08:40:12] Task F1-T3 - ✅ COMPLETED
+
+**Iteration:** 1
+**Result:** All tests passed
+**Commit:** feat: Create MCP configure tool [task-F1-T3]
+
+### What was implemented
+- Added mcp__bip__configure tool to the MCP server in src/index.ts
+- Imported preferencesService from preferences.ts
+- Added tool to ListToolsRequestSchema with proper input schema:
+  - language parameter (enum: 'pt-BR' | 'en-US')
+  - features parameter (object with enableCommitTweets, enableAchievementTweets, enableLearningTweets)
+- Implemented tool handler in CallToolRequestSchema:
+  - Returns current configuration when called with no parameters
+  - Validates language enum values before saving
+  - Uses preferencesService.updatePreferences() to save changes
+  - Returns updated configuration with visual indicators (✅/❌)
+- All acceptance criteria met on first attempt
+
+### Files changed
+- Modified: src/index.ts (added import, new tool definition, new tool handler)
+- Modified: prp.json (marked F1-T3 as passes: true)
+- Modified: progress.txt (this file)
+
+### Learnings for future iterations
+- MCP tool registration follows consistent pattern: define in ListToolsRequestSchema, handle in CallToolRequestSchema
+- Tool handlers return { content: [{ type: 'text', text: '...' }] } format
+- Error responses include isError: true flag
+- PreferencesService singleton pattern makes it easy to use in MCP handlers
+- No need for additional imports beyond the singleton instance
+

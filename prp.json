@@ -76,7 +76,7 @@
           "title": "Create MCP configure tool",
           "description": "Add mcp__bip__configure tool to MCP server for setting user preferences via Claude",
           "priority": 3,
-          "passes": false,
+          "passes": true,
           "context": {
             "files": [
               "src/index.ts",
