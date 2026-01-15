@@ -79,3 +79,32 @@
 **Result:** All tests passed
 **Commit:** feat: Create MCP configure tool [task-F1-T3]
 
+---
+
+## [2026-01-15 08:45:32] Task F1-T4 - ✅ COMPLETED
+
+**Iteration:** 1
+**Result:** All tests passed
+**Commit:** feat: Check configuration before first thread [task-F1-T4]
+
+### What was implemented
+- Added hasPreferences import from storage service to src/index.ts
+- Updated both 'retro' and 'suggest' prompt handlers to check if preferences exist before generating suggestions
+- Added informative, non-blocking message when preferences don't exist:
+  - Message appears at the end of prompt instructions
+  - Informs users about mcp__bip__configure tool for customization
+  - Clarifies default behavior (en-US, all features enabled)
+  - Doesn't block user from proceeding
+- Converted both prompt cases to block scope with hasPrefs check
+
+### Files changed
+- Modified: src/index.ts (added hasPreferences import, updated retro and suggest prompts)
+- Modified: prp.json (marked F1-T4 as passes: true)
+- Modified: progress.txt (this file)
+
+### Learnings for future iterations
+- GetPromptRequestSchema handlers can use switch cases with block scopes to add local variables
+- hasPreferences() method from storage service provides clean way to check if preferences file exists
+- Informative messages should guide users without blocking their workflow
+- Pattern: check state, conditionally build message, append to prompt text
+- All acceptance criteria met on first try - TypeScript build passed without errors
