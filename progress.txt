@@ -6,3 +6,29 @@
 **Result:** All tests passed
 **Commit:** feat: Create preferences storage system [task-F1-T1]
 
+---
+
+## [2026-01-15 08:35:12] Task F1-T2 - ✅ COMPLETED
+
+**Iteration:** 1
+**Result:** All tests passed
+**Commit:** feat: Implement preferences service with defaults [task-F1-T2]
+
+### What was implemented
+- Created PreferencesService class in src/services/preferences.ts
+- Implemented getPreferences() method that returns defaults if no preferences file exists
+- Implemented updatePreferences() method that merges partial updates with existing configuration
+- Default preferences: language='en-US', all features enabled (enableCommitTweets, enableAchievementTweets, enableLearningTweets all set to true)
+- Exported singleton instance for easy use across codebase
+
+### Files changed
+- Created: src/services/preferences.ts
+- Modified: prp.json (marked F1-T2 as passes: true)
+- Modified: progress.txt (this file)
+
+### Learnings for future iterations
+- The storage layer already had UserPreferences interface and savePreferences/loadPreferences functions from F1-T1
+- PreferencesService pattern follows the singleton pattern used elsewhere in the codebase
+- Deep merge pattern used for features object to allow partial updates (e.g., updating only enableCommitTweets without affecting other feature flags)
+- TypeScript strict mode caught no issues - clean implementation on first try
+
