@@ -26,9 +26,11 @@ import {
   loadSessionContext,
   saveSessionContext,
   hasSessionContext,
+  hasPreferences,
   SessionContext,
 } from './services/storage.js';
 import { generateSuggestions, scoreConfidence } from './services/suggestion-engine.js';
+import { preferencesService } from './services/preferences.js';
 
 // MCP Server instance
 const server = new Server(
@@ -82,7 +84,13 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   switch (name) {
-    case 'retro':
+    case 'retro': {
+      // Check if preferences exist
+      const hasPrefs = hasPreferences();
+      const configMessage = hasPrefs
+        ? ''
+        : `\n\n**Note:** You haven't configured your preferences yet. You can use the mcp__bip__configure tool to set your language (pt-BR or en-US) and enable/disable specific tweet types. For now, we'll proceed with defaults (en-US, all features enabled).`;
+
       return {
         messages: [
           {
@@ -119,11 +127,12 @@ Analyze the ENTIRE coding session and help me share what I accomplished on Twitt
 
 6. **Post the tweet** - Once I choose, use mcp__bip__tweet to post it
 
-**Important:** This is about celebrating progress and sharing learnings authentically. Focus on what was actually accomplished, not hype.`,
+**Important:** This is about celebrating progress and sharing learnings authentically. Focus on what was actually accomplished, not hype.${configMessage}`,
             },
           },
         ],
       };
+    }
 
     case 'quick':
       const message = args?.message as string;
@@ -156,7 +165,13 @@ After posting, show me the tweet URL.`,
         ],
       };
 
-    case 'suggest':
+    case 'suggest': {
+      // Check if preferences exist
+      const hasPrefs = hasPreferences();
+      const configMessage = hasPrefs
+        ? ''
+        : `\n\n**Note:** You haven't configured your preferences yet. You can use the mcp__bip__configure tool to set your language (pt-BR or en-US) and enable/disable specific tweet types. For now, we'll proceed with defaults (en-US, all features enabled).`;
+
       return {
         messages: [
           {
@@ -175,11 +190,12 @@ Based on the current session context, generate intelligent tweet suggestions.
 4. **Let me choose** - I'll pick one to post or provide a custom message
 5. **Post** - Use mcp__bip__tweet when I'm ready
 
-Focus on authentic sharing of progress, learnings, and challenges.`,
+Focus on authentic sharing of progress, learnings, and challenges.${configMessage}`,
             },
           },
         ],
       };
+    }
 
     default:
       throw new Error(`Unknown prompt: ${name}`);
@@ -286,6 +302,38 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             contextId: {
               type: 'string',
               description: 'Optional context ID (uses current session if not provided)',
+            },
+          },
+        },
+      },
+      {
+        name: 'mcp__bip__configure',
+        description: 'Configure user preferences for Build in Public (language and features)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            language: {
+              type: 'string',
+              enum: ['pt-BR', 'en-US'],
+              description: 'Preferred language for tweets and messages',
+            },
+            features: {
+              type: 'object',
+              description: 'Feature flags to enable/disable specific tweet types',
+              properties: {
+                enableCommitTweets: {
+                  type: 'boolean',
+                  description: 'Enable automatic tweet suggestions for git commits',
+                },
+                enableAchievementTweets: {
+                  type: 'boolean',
+                  description: 'Enable tweet suggestions for logged achievements',
+                },
+                enableLearningTweets: {
+                  type: 'boolean',
+                  description: 'Enable tweet suggestions for learning moments (TIL)',
+                },
+              },
             },
           },
         },
@@ -631,6 +679,116 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: contextText,
+            },
+          ],
+        };
+      }
+
+      case 'mcp__bip__configure': {
+        const { language, features } = args as {
+          language?: 'pt-BR' | 'en-US';
+          features?: {
+            enableCommitTweets?: boolean;
+            enableAchievementTweets?: boolean;
+            enableLearningTweets?: boolean;
+          };
+        };
+
+        // If no parameters provided, return current configuration
+        if (!language && !features) {
+          const currentPrefs = preferencesService.getPreferences();
+
+          let configText = `⚙️  Current Configuration\n\n`;
+          configText += `Language: ${currentPrefs.language}\n\n`;
+          configText += `Features:\n`;
+          configText += `  • Commit tweets: ${currentPrefs.features.enableCommitTweets ? '✅' : '❌'}\n`;
+          configText += `  • Achievement tweets: ${currentPrefs.features.enableAchievementTweets ? '✅' : '❌'}\n`;
+          configText += `  • Learning tweets: ${currentPrefs.features.enableLearningTweets ? '✅' : '❌'}\n`;
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: configText,
+              },
+            ],
+          };
+        }
+
+        // Validate language enum if provided
+        if (language && language !== 'pt-BR' && language !== 'en-US') {
+          return {
+            content: [
+              {
+                type: 'text',
+                text:
+                  `❌ Invalid language: ${language}\n\n` +
+                  `Supported languages: pt-BR, en-US`,
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        // Get current preferences before update
+        const beforePrefs = preferencesService.getPreferences();
+
+        // Build update object
+        const updates: any = {};
+        if (language) {
+          updates.language = language;
+        }
+        if (features) {
+          updates.features = features;
+        }
+
+        // Update preferences
+        const afterPrefs = preferencesService.updatePreferences(updates);
+
+        // Build before/after display
+        let responseText = `✅ Preferences updated successfully!\n\n`;
+
+        // Show language change if updated
+        if (language && beforePrefs.language !== afterPrefs.language) {
+          responseText += `Language: ${beforePrefs.language} → ${afterPrefs.language}\n`;
+        } else {
+          responseText += `Language: ${afterPrefs.language}\n`;
+        }
+
+        responseText += `\nFeatures:\n`;
+
+        // Show commit tweets change if updated
+        const commitBefore = beforePrefs.features.enableCommitTweets;
+        const commitAfter = afterPrefs.features.enableCommitTweets;
+        if (features?.enableCommitTweets !== undefined && commitBefore !== commitAfter) {
+          responseText += `  • Commit tweets: ${commitBefore ? '✅' : '❌'} → ${commitAfter ? '✅' : '❌'}\n`;
+        } else {
+          responseText += `  • Commit tweets: ${commitAfter ? '✅' : '❌'}\n`;
+        }
+
+        // Show achievement tweets change if updated
+        const achievementBefore = beforePrefs.features.enableAchievementTweets;
+        const achievementAfter = afterPrefs.features.enableAchievementTweets;
+        if (features?.enableAchievementTweets !== undefined && achievementBefore !== achievementAfter) {
+          responseText += `  • Achievement tweets: ${achievementBefore ? '✅' : '❌'} → ${achievementAfter ? '✅' : '❌'}\n`;
+        } else {
+          responseText += `  • Achievement tweets: ${achievementAfter ? '✅' : '❌'}\n`;
+        }
+
+        // Show learning tweets change if updated
+        const learningBefore = beforePrefs.features.enableLearningTweets;
+        const learningAfter = afterPrefs.features.enableLearningTweets;
+        if (features?.enableLearningTweets !== undefined && learningBefore !== learningAfter) {
+          responseText += `  • Learning tweets: ${learningBefore ? '✅' : '❌'} → ${learningAfter ? '✅' : '❌'}\n`;
+        } else {
+          responseText += `  • Learning tweets: ${learningAfter ? '✅' : '❌'}\n`;
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: responseText,
             },
           ],
         };

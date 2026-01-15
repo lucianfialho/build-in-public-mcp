@@ -1,0 +1,203 @@
+{
+  "project": {
+    "name": "Build in Public MCP",
+    "description": "Initial Configuration Flow - Let users configure language and features before first thread",
+    "branchName": "saci/initial-configuration"
+  },
+  "features": [
+    {
+      "id": "F1",
+      "name": "Initial Configuration Flow",
+      "description": "Add preferences system with language and feature toggles, configurable via MCP tool",
+      "priority": 1,
+      "tasks": [
+        {
+          "id": "F1-T1",
+          "title": "Create preferences storage system",
+          "description": "Add UserPreferences interface and storage methods to storage service for persisting user configuration in preferences.json",
+          "priority": 1,
+          "passes": true,
+          "context": {
+            "files": [
+              "src/services/storage.ts"
+            ],
+            "libraries": [
+              "fs/promises",
+              "path"
+            ],
+            "hints": [
+              "Follow existing pattern from saveAuthTokens/loadAuthTokens",
+              "UserPreferences interface: { language: 'pt-BR' | 'en-US', features: { enableCommitTweets: boolean, enableAchievementTweets: boolean, enableLearningTweets: boolean } }",
+              "File permissions: 0o600 for preferences.json",
+              "Add hasPreferences() method to check if file exists"
+            ]
+          },
+          "acceptance": [
+            "Create UserPreferences interface with language and features object",
+            "Add savePreferences(), loadPreferences(), hasPreferences() methods to storage service",
+            "Preferences saved to ~/.build-in-public/preferences.json with 0o600 permissions",
+            "Typecheck passes"
+          ],
+          "tests": {
+            "command": "npm run build"
+          }
+        },
+        {
+          "id": "F1-T2",
+          "title": "Implement preferences service with defaults",
+          "description": "Create PreferencesService that loads preferences from storage with sensible defaults (en-US, all features enabled)",
+          "priority": 2,
+          "passes": true,
+          "context": {
+            "files": [
+              "src/services/preferences.ts"
+            ],
+            "libraries": [],
+            "hints": [
+              "Create new file: src/services/preferences.ts",
+              "Default preferences: { language: 'en-US', features: { enableCommitTweets: true, enableAchievementTweets: true, enableLearningTweets: true } }",
+              "getPreferences() should return defaults if file doesn't exist",
+              "updatePreferences() should merge partial updates with existing config"
+            ]
+          },
+          "acceptance": [
+            "Create PreferencesService with getPreferences() method",
+            "Default values: language='en-US', all features enabled (true)",
+            "Service loads from file if exists, otherwise returns defaults",
+            "Service has updatePreferences() method to save changes",
+            "Typecheck passes"
+          ],
+          "tests": {
+            "command": "npm run build"
+          }
+        },
+        {
+          "id": "F1-T3",
+          "title": "Create MCP configure tool",
+          "description": "Add mcp__bip__configure tool to MCP server for setting user preferences via Claude",
+          "priority": 3,
+          "passes": true,
+          "context": {
+            "files": [
+              "src/index.ts",
+              "src/services/preferences.ts"
+            ],
+            "libraries": [
+              "@modelcontextprotocol/sdk"
+            ],
+            "hints": [
+              "Add new tool handler in src/index.ts",
+              "Tool name: mcp__bip__configure",
+              "Parameters: language (optional, enum: 'pt-BR' | 'en-US'), features (optional, object with boolean flags)",
+              "Validate language enum before saving",
+              "Return current configuration after saving"
+            ]
+          },
+          "acceptance": [
+            "Add mcp__bip__configure tool with parameters: language (optional), features (optional)",
+            "Tool accepts: language ('pt-BR' | 'en-US'), features object with boolean flags",
+            "Tool validates input and saves to preferences.json",
+            "Tool returns current configuration after saving",
+            "If no parameters provided, returns current config without changing",
+            "Typecheck passes"
+          ],
+          "tests": {
+            "command": "npm run build"
+          }
+        },
+        {
+          "id": "F1-T4",
+          "title": "Check configuration before first thread",
+          "description": "Add logic to suggest configuration setup if preferences don't exist when user tries to generate thread",
+          "priority": 4,
+          "passes": true,
+          "context": {
+            "files": [
+              "src/index.ts"
+            ],
+            "libraries": [],
+            "hints": [
+              "Update suggest and retro prompt handlers",
+              "Use hasPreferences() from storage service",
+              "If no preferences, include helpful message suggesting mcp__bip__configure tool",
+              "Don't block - user can still proceed with defaults",
+              "Message should be informative: 'You can configure language and features using the configure tool, or proceed with defaults (en-US, all features enabled)'"
+            ]
+          },
+          "acceptance": [
+            "Before generating thread suggestions, check if preferences exist",
+            "If no preferences file exists AND user is about to post first thread, suggest running configure tool",
+            "Suggestion is informative, not blocking (user can proceed with defaults)",
+            "Check integrated into suggest and retro prompts",
+            "Typecheck passes"
+          ],
+          "tests": {
+            "command": "npm run build"
+          }
+        },
+        {
+          "id": "F1-T5",
+          "title": "Update suggestion engine to use language preference",
+          "description": "Modify suggestion engine to generate tweets in the user's preferred language",
+          "priority": 5,
+          "passes": true,
+          "context": {
+            "files": [
+              "src/services/suggestion-engine.ts",
+              "src/services/preferences.ts"
+            ],
+            "libraries": [],
+            "hints": [
+              "Load preferences in suggestion engine",
+              "Add language instruction to system message: 'Generate tweets in [language]. Use natural, native phrasing.'",
+              "Update all strategy prompts to respect language",
+              "Default to 'en-US' if preferences not available",
+              "Test with both pt-BR and en-US"
+            ]
+          },
+          "acceptance": [
+            "Suggestion engine loads language from preferences",
+            "All tweet templates and prompts use the configured language",
+            "System message in suggestion engine includes language instruction",
+            "Default to 'en-US' if preferences not set",
+            "Typecheck passes"
+          ],
+          "tests": {
+            "command": "npm run build"
+          }
+        },
+        {
+          "id": "F1-T6",
+          "title": "Add reconfigure capability and documentation",
+          "description": "Ensure configure tool supports updates and add documentation for reconfiguration workflow",
+          "priority": 6,
+          "passes": true,
+          "context": {
+            "files": [
+              "src/index.ts",
+              "README.md"
+            ],
+            "libraries": [],
+            "hints": [
+              "Verify mcp__bip__configure tool handles partial updates (merge with existing)",
+              "Show before/after when updating: 'Updated preferences from {...} to {...}'",
+              "Update README.md with configuration examples",
+              "Document both pt-BR and en-US options",
+              "Add feature toggle examples"
+            ]
+          },
+          "acceptance": [
+            "mcp__bip__configure tool can be called multiple times",
+            "Tool merges partial updates (doesn't require all fields)",
+            "Tool shows before/after configuration when updating",
+            "Documentation updated with reconfigure example",
+            "Typecheck passes"
+          ],
+          "tests": {
+            "command": "npm run build"
+          }
+        }
+      ]
+    }
+  ]
+}

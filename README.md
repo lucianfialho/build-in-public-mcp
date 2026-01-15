@@ -330,6 +330,77 @@ Check authentication status and show storage location.
 
 **Returns:** Status info including authenticated user
 
+### `mcp__bip__configure`
+Configure your preferences for language and feature toggles.
+
+**Input:**
+```json
+{
+  "language": "pt-BR",  // Optional: "pt-BR" or "en-US"
+  "features": {         // Optional: partial updates supported
+    "enableCommitTweets": true,
+    "enableAchievementTweets": false,
+    "enableLearningTweets": true
+  }
+}
+```
+
+**Returns:** Updated configuration with before/after display
+
+**Examples:**
+
+```
+# View current configuration
+You: Show my current preferences
+Claude: [calls mcp__bip__configure with no parameters]
+  ⚙️  Current Configuration
+
+  Language: en-US
+
+  Features:
+    • Commit tweets: ✅
+    • Achievement tweets: ✅
+    • Learning tweets: ✅
+
+# Change language to Portuguese
+You: Configure build in public to use Portuguese
+Claude: [calls mcp__bip__configure with language: "pt-BR"]
+  ✅ Preferences updated successfully!
+
+  Language: en-US → pt-BR
+
+  Features:
+    • Commit tweets: ✅
+    • Achievement tweets: ✅
+    • Learning tweets: ✅
+
+# Disable specific tweet types (partial update)
+You: Disable achievement tweets
+Claude: [calls mcp__bip__configure with features: { enableAchievementTweets: false }]
+  ✅ Preferences updated successfully!
+
+  Language: pt-BR
+
+  Features:
+    • Commit tweets: ✅
+    • Achievement tweets: ✅ → ❌
+    • Learning tweets: ✅
+
+# Update multiple settings at once
+You: Set language to English and enable only learning tweets
+Claude: [calls mcp__bip__configure with language: "en-US" and features]
+  ✅ Preferences updated successfully!
+
+  Language: pt-BR → en-US
+
+  Features:
+    • Commit tweets: ✅ → ❌
+    • Achievement tweets: ❌
+    • Learning tweets: ✅
+```
+
+**Note:** The configure tool supports partial updates - you don't need to specify all fields, only the ones you want to change. Your preferences are saved to `~/.build-in-public/preferences.json`.
+
 ## 🔐 Privacy & Security
 
 - ✅ OAuth tokens stored locally in `~/.build-in-public/auth.json`
