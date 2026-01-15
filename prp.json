@@ -47,7 +47,7 @@
           "title": "Implement preferences service with defaults",
           "description": "Create PreferencesService that loads preferences from storage with sensible defaults (en-US, all features enabled)",
           "priority": 2,
-          "passes": true,
+          "passes": false,
           "context": {
             "files": [
               "src/services/preferences.ts"
@@ -76,7 +76,7 @@
           "title": "Create MCP configure tool",
           "description": "Add mcp__bip__configure tool to MCP server for setting user preferences via Claude",
           "priority": 3,
-          "passes": true,
+          "passes": false,
           "context": {
             "files": [
               "src/index.ts",
@@ -110,7 +110,7 @@
           "title": "Check configuration before first thread",
           "description": "Add logic to suggest configuration setup if preferences don't exist when user tries to generate thread",
           "priority": 4,
-          "passes": true,
+          "passes": false,
           "context": {
             "files": [
               "src/index.ts"
@@ -140,7 +140,7 @@
           "title": "Update suggestion engine to use language preference",
           "description": "Modify suggestion engine to generate tweets in the user's preferred language",
           "priority": 5,
-          "passes": true,
+          "passes": false,
           "context": {
             "files": [
               "src/services/suggestion-engine.ts",
