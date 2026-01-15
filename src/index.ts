@@ -26,6 +26,7 @@ import {
   loadSessionContext,
   saveSessionContext,
   hasSessionContext,
+  hasPreferences,
   SessionContext,
 } from './services/storage.js';
 import { generateSuggestions, scoreConfidence } from './services/suggestion-engine.js';
@@ -83,7 +84,13 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   switch (name) {
-    case 'retro':
+    case 'retro': {
+      // Check if preferences exist
+      const hasPrefs = hasPreferences();
+      const configMessage = hasPrefs
+        ? ''
+        : `\n\n**Note:** You haven't configured your preferences yet. You can use the mcp__bip__configure tool to set your language (pt-BR or en-US) and enable/disable specific tweet types. For now, we'll proceed with defaults (en-US, all features enabled).`;
+
       return {
         messages: [
           {
@@ -120,11 +127,12 @@ Analyze the ENTIRE coding session and help me share what I accomplished on Twitt
 
 6. **Post the tweet** - Once I choose, use mcp__bip__tweet to post it
 
-**Important:** This is about celebrating progress and sharing learnings authentically. Focus on what was actually accomplished, not hype.`,
+**Important:** This is about celebrating progress and sharing learnings authentically. Focus on what was actually accomplished, not hype.${configMessage}`,
             },
           },
         ],
       };
+    }
 
     case 'quick':
       const message = args?.message as string;
@@ -157,7 +165,13 @@ After posting, show me the tweet URL.`,
         ],
       };
 
-    case 'suggest':
+    case 'suggest': {
+      // Check if preferences exist
+      const hasPrefs = hasPreferences();
+      const configMessage = hasPrefs
+        ? ''
+        : `\n\n**Note:** You haven't configured your preferences yet. You can use the mcp__bip__configure tool to set your language (pt-BR or en-US) and enable/disable specific tweet types. For now, we'll proceed with defaults (en-US, all features enabled).`;
+
       return {
         messages: [
           {
@@ -176,11 +190,12 @@ Based on the current session context, generate intelligent tweet suggestions.
 4. **Let me choose** - I'll pick one to post or provide a custom message
 5. **Post** - Use mcp__bip__tweet when I'm ready
 
-Focus on authentic sharing of progress, learnings, and challenges.`,
+Focus on authentic sharing of progress, learnings, and challenges.${configMessage}`,
             },
           },
         ],
       };
+    }
 
     default:
       throw new Error(`Unknown prompt: ${name}`);
