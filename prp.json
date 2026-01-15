@@ -171,7 +171,7 @@
           "title": "Add reconfigure capability and documentation",
           "description": "Ensure configure tool supports updates and add documentation for reconfiguration workflow",
           "priority": 6,
-          "passes": false,
+          "passes": true,
           "context": {
             "files": [
               "src/index.ts",
