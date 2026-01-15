@@ -16,7 +16,7 @@
           "title": "Create preferences storage system",
           "description": "Add UserPreferences interface and storage methods to storage service for persisting user configuration in preferences.json",
           "priority": 1,
-          "passes": false,
+          "passes": true,
           "context": {
             "files": [
               "src/services/storage.ts"
