@@ -140,7 +140,7 @@
           "title": "Update suggestion engine to use language preference",
           "description": "Modify suggestion engine to generate tweets in the user's preferred language",
           "priority": 5,
-          "passes": false,
+          "passes": true,
           "context": {
             "files": [
               "src/services/suggestion-engine.ts",
