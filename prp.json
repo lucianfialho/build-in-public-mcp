@@ -47,7 +47,7 @@
           "title": "Implement preferences service with defaults",
           "description": "Create PreferencesService that loads preferences from storage with sensible defaults (en-US, all features enabled)",
           "priority": 2,
-          "passes": false,
+          "passes": true,
           "context": {
             "files": [
               "src/services/preferences.ts"
