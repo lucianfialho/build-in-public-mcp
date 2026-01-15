@@ -110,7 +110,7 @@
           "title": "Check configuration before first thread",
           "description": "Add logic to suggest configuration setup if preferences don't exist when user tries to generate thread",
           "priority": 4,
-          "passes": false,
+          "passes": true,
           "context": {
             "files": [
               "src/index.ts"
