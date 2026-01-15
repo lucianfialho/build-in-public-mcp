@@ -108,3 +108,29 @@
 - Informative messages should guide users without blocking their workflow
 - Pattern: check state, conditionally build message, append to prompt text
 - All acceptance criteria met on first try - TypeScript build passed without errors
+
+---
+
+## [2026-01-15 09:15:00] Task F1-T4 - Iteration 7 Verification
+
+**Status:** ✅ VERIFIED COMPLETE (no changes needed)
+**Result:** Build passes, all acceptance criteria met
+
+### Verification Details
+Task F1-T4 was already completed in iteration 1 (commit 80bf47e). Iterations 2-6 failed because they attempted to re-implement existing functionality.
+
+Current implementation status:
+- src/index.ts lines 88-92: retro prompt checks hasPreferences() and shows configMessage
+- src/index.ts lines 169-173: suggest prompt checks hasPreferences() and shows configMessage
+- Both prompts inform users about mcp__bip__configure tool
+- Messages are non-blocking (users can proceed with defaults: en-US, all features enabled)
+- TypeScript build passes without errors
+
+All acceptance criteria from PRP are satisfied:
+✅ Before generating thread suggestions, check if preferences exist
+✅ If no preferences file exists AND user is about to post first thread, suggest running configure tool
+✅ Suggestion is informative, not blocking (user can proceed with defaults)
+✅ Check integrated into suggest and retro prompts
+✅ Typecheck passes
+
+**Next task:** F1-T5 (Update suggestion engine to use language preference)
