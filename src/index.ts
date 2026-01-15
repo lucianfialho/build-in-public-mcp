@@ -29,6 +29,7 @@ import {
   SessionContext,
 } from './services/storage.js';
 import { generateSuggestions, scoreConfidence } from './services/suggestion-engine.js';
+import { preferencesService } from './services/preferences.js';
 
 // MCP Server instance
 const server = new Server(
@@ -286,6 +287,38 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             contextId: {
               type: 'string',
               description: 'Optional context ID (uses current session if not provided)',
+            },
+          },
+        },
+      },
+      {
+        name: 'mcp__bip__configure',
+        description: 'Configure user preferences for Build in Public (language and features)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            language: {
+              type: 'string',
+              enum: ['pt-BR', 'en-US'],
+              description: 'Preferred language for tweets and messages',
+            },
+            features: {
+              type: 'object',
+              description: 'Feature flags to enable/disable specific tweet types',
+              properties: {
+                enableCommitTweets: {
+                  type: 'boolean',
+                  description: 'Enable automatic tweet suggestions for git commits',
+                },
+                enableAchievementTweets: {
+                  type: 'boolean',
+                  description: 'Enable tweet suggestions for logged achievements',
+                },
+                enableLearningTweets: {
+                  type: 'boolean',
+                  description: 'Enable tweet suggestions for learning moments (TIL)',
+                },
+              },
             },
           },
         },
@@ -631,6 +664,81 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: contextText,
+            },
+          ],
+        };
+      }
+
+      case 'mcp__bip__configure': {
+        const { language, features } = args as {
+          language?: 'pt-BR' | 'en-US';
+          features?: {
+            enableCommitTweets?: boolean;
+            enableAchievementTweets?: boolean;
+            enableLearningTweets?: boolean;
+          };
+        };
+
+        // If no parameters provided, return current configuration
+        if (!language && !features) {
+          const currentPrefs = preferencesService.getPreferences();
+
+          let configText = `⚙️  Current Configuration\n\n`;
+          configText += `Language: ${currentPrefs.language}\n\n`;
+          configText += `Features:\n`;
+          configText += `  • Commit tweets: ${currentPrefs.features.enableCommitTweets ? '✅' : '❌'}\n`;
+          configText += `  • Achievement tweets: ${currentPrefs.features.enableAchievementTweets ? '✅' : '❌'}\n`;
+          configText += `  • Learning tweets: ${currentPrefs.features.enableLearningTweets ? '✅' : '❌'}\n`;
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: configText,
+              },
+            ],
+          };
+        }
+
+        // Validate language enum if provided
+        if (language && language !== 'pt-BR' && language !== 'en-US') {
+          return {
+            content: [
+              {
+                type: 'text',
+                text:
+                  `❌ Invalid language: ${language}\n\n` +
+                  `Supported languages: pt-BR, en-US`,
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        // Build update object
+        const updates: any = {};
+        if (language) {
+          updates.language = language;
+        }
+        if (features) {
+          updates.features = features;
+        }
+
+        // Update preferences
+        const updatedPrefs = preferencesService.updatePreferences(updates);
+
+        let responseText = `✅ Preferences updated successfully!\n\n`;
+        responseText += `Language: ${updatedPrefs.language}\n\n`;
+        responseText += `Features:\n`;
+        responseText += `  • Commit tweets: ${updatedPrefs.features.enableCommitTweets ? '✅' : '❌'}\n`;
+        responseText += `  • Achievement tweets: ${updatedPrefs.features.enableAchievementTweets ? '✅' : '❌'}\n`;
+        responseText += `  • Learning tweets: ${updatedPrefs.features.enableLearningTweets ? '✅' : '❌'}\n`;
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: responseText,
             },
           ],
         };
