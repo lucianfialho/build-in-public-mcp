@@ -11,12 +11,22 @@ const STORAGE_DIR = path.join(os.homedir(), '.build-in-public');
 const AUTH_FILE = path.join(STORAGE_DIR, 'auth.json');
 const CONTEXT_FILE = path.join(STORAGE_DIR, 'context.json');
 const HISTORY_FILE = path.join(STORAGE_DIR, 'history.json');
+const PREFERENCES_FILE = path.join(STORAGE_DIR, 'preferences.json');
 
 export interface AuthTokens {
   apiKey: string;
   apiSecret: string;
   accessToken: string;
   accessTokenSecret: string;
+}
+
+export interface UserPreferences {
+  language: 'pt-BR' | 'en-US';
+  features: {
+    enableCommitTweets: boolean;
+    enableAchievementTweets: boolean;
+    enableLearningTweets: boolean;
+  };
 }
 
 export interface TweetHistory {
@@ -297,4 +307,39 @@ export function clearSessionContext(): void {
  */
 export function hasSessionContext(): boolean {
   return fs.existsSync(CONTEXT_FILE);
+}
+
+/**
+ * Check if preferences exist
+ */
+export function hasPreferences(): boolean {
+  return fs.existsSync(PREFERENCES_FILE);
+}
+
+/**
+ * Save user preferences to file
+ */
+export function savePreferences(preferences: UserPreferences): void {
+  ensureStorageDir();
+  fs.writeFileSync(PREFERENCES_FILE, JSON.stringify(preferences, null, 2), {
+    mode: 0o600, // rw-------
+  });
+  console.error('✅ Preferences saved to:', PREFERENCES_FILE);
+}
+
+/**
+ * Load user preferences from file
+ */
+export function loadPreferences(): UserPreferences | null {
+  if (!fs.existsSync(PREFERENCES_FILE)) {
+    return null;
+  }
+
+  try {
+    const data = fs.readFileSync(PREFERENCES_FILE, 'utf-8');
+    return JSON.parse(data) as UserPreferences;
+  } catch (error) {
+    console.error('❌ Failed to load preferences:', error);
+    return null;
+  }
 }
